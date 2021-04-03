@@ -1,10 +1,7 @@
-export default interface PointInfo {
+import { Feature } from "geojson";
+
+export default interface PointInfo extends Feature {
   id: string;
-  type: string;
-  geometry: {
-    type: string;
-    coordinates: [number, number];
-  };
   properties: {
     "@id": string;
     "@type": string;
@@ -17,29 +14,26 @@ export default interface PointInfo {
     forecastHourly: string;
     forecastGridData: string;
     observationStations: string;
-    relativeLocation: {
-      type: string;
-      geometry: {
-        type: string;
-        coordinates: [number, number];
-      };
-      properties: {
-        city: string;
-        state: string;
-        distance: {
-          value: number;
-          unitCode: string;
-        };
-        bearing: {
-          value: number;
-          unitCode: string;
-        };
-      };
-    };
+    relativeLocation: RelativeLocation;
     forecastZone: string;
     county: string;
     fireWeatherZone: string;
     timeZone: string;
     radarStation: string;
+  };
+}
+
+interface RelativeLocation extends Feature {
+  properties: {
+    city: string;
+    state: string;
+    distance: {
+      value: number;
+      unitCode: string;
+    };
+    bearing: {
+      value: number;
+      unitCode: string;
+    };
   };
 }

@@ -1,9 +1,6 @@
-export default interface ForecastResponse {
-  type: string;
-  geometry: {
-    type: string;
-    coordinates: Array<Array<[number, number]>>;
-  };
+import { Feature } from "geojson";
+
+export default interface ForecastResponse extends Feature {
   properties: {
     updated: string;
     units: string;
