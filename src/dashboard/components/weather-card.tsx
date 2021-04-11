@@ -1,4 +1,3 @@
-import React from "react";
 import { Box, Card, CardContent, Typography } from "@material-ui/core";
 import * as temperatureUtils from "../utils/temperature.utils";
 

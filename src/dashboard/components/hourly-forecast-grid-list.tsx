@@ -1,5 +1,5 @@
 import { Card, CardContent, Divider } from "@material-ui/core";
-import React from "react";
+import { Fragment } from "react";
 import { Period } from "../../nws/interfaces/forecast-response";
 import HourlyForecastGridListTile from "./hourly-forecast-grid-list-tile";
 import useStyles from "./hourly-forecast-grid-list.styles";
@@ -21,7 +21,7 @@ export default function HourlyForecastGridList({
               { temperature, temperatureUnit, startTime: time, icon },
               index
             ) => (
-              <React.Fragment key={time}>
+              <Fragment key={time}>
                 <HourlyForecastGridListTile
                   temperature={temperature}
                   temperatureUnit={temperatureUnit}
@@ -31,7 +31,7 @@ export default function HourlyForecastGridList({
                 {index !== periods.length - 1 && (
                   <Divider orientation="vertical" />
                 )}
-              </React.Fragment>
+              </Fragment>
             )
           )}
         </div>
