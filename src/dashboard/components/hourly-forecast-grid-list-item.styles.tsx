@@ -1,13 +1,11 @@
 import { makeStyles } from "@material-ui/core";
 
 const useStyles = makeStyles((theme) => ({
-  spacer: {
-    flexGrow: 1,
-  },
-  main: {
+  root: {
     display: "flex",
     flexDirection: "column",
-    gap: theme.spacing(2),
+    alignItems: "center",
+    gap: theme.spacing(1),
   },
 }));
 

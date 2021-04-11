@@ -22,6 +22,7 @@ import useSerializeValue from "../../common/hooks/use-serialize-value";
 import Menu from "../components/menu";
 import Coordinates from "../../common/interfaces/coordinates";
 import useStyles from "./dashboard.styles";
+import HourlyForecastGridList from "../components/hourly-forecast-grid-list";
 
 function initializeForecastState(): ForecastState {
   return {
@@ -173,15 +174,20 @@ export default function DashboardPage() {
         }}
       />
       {loading && <LinearProgress color="secondary" />}
-      {currentWeather !== null && (
-        <WeatherCard
-          temperature={Math.round(currentWeather.temperature.value ?? NaN)}
-          temperatureUnit="C"
-          icon={currentWeather.icon}
-          shortForecast={currentWeather.textDescription}
-          updateTime={new Date(currentWeather.timestamp)}
+      <main className={classes.main}>
+        {currentWeather !== null && (
+          <WeatherCard
+            temperature={Math.round(currentWeather.temperature.value ?? NaN)}
+            temperatureUnit="C"
+            icon={currentWeather.icon}
+            shortForecast={currentWeather.textDescription}
+            updateTime={new Date(currentWeather.timestamp)}
+          />
+        )}
+        <HourlyForecastGridList
+          periods={hourlyForecast?.properties.periods ?? []}
         />
-      )}
+      </main>
     </>
   );
 }
