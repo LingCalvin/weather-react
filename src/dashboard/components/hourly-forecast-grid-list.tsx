@@ -14,7 +14,12 @@ export default function HourlyForecastGridList({
   const classes = useStyles();
   return (
     <Card>
-      <CardContent>
+      <CardContent className={classes.gridListContainer}>
+        {/*
+         * Maintain consistent spacing between tile and edge and tile and
+         * divider.
+         */}
+        <div className={classes.spacer} />
         <div className={classes.gridList}>
           {periods.map(
             (
@@ -35,6 +40,7 @@ export default function HourlyForecastGridList({
             )
           )}
         </div>
+        <div className={classes.spacer} />
       </CardContent>
     </Card>
   );
