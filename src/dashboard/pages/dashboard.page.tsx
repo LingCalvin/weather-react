@@ -126,6 +126,15 @@ export default function DashboardPage() {
   useSerializeValue("station", stationId);
   useSerializeValue("observation", observation);
 
+  const currentDate = new Date();
+  const endDate = new Date(currentDate);
+  endDate.setDate(endDate.getDate() + 1);
+  endDate.setHours(0, 0, 0, 0);
+  const currentHourlyPeriods = hourlyForecast?.properties.periods.filter(
+    ({ endTime, startTime }) =>
+      new Date(endTime) > currentDate && new Date(startTime) < endDate
+  );
+
   const updateLocation = () => {
     geolocationService.getCurrentPosition().then(({ coords }) => {
       forecastStateDispatch({
@@ -184,9 +193,7 @@ export default function DashboardPage() {
             updateTime={new Date(currentWeather.timestamp)}
           />
         )}
-        <HourlyForecastGridList
-          periods={hourlyForecast?.properties.periods ?? []}
-        />
+        <HourlyForecastGridList periods={currentHourlyPeriods ?? []} />
       </main>
     </>
   );
