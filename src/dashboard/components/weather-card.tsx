@@ -1,12 +1,13 @@
 import { Box, Card, CardContent, Typography } from "@material-ui/core";
 import * as temperatureUtils from "../utils/temperature.utils";
 
-interface WeatherCardProps {
+export interface WeatherCardProps {
   icon: string;
   shortForecast: string;
   temperature: number;
   temperatureUnit: string;
   updateTime?: Date;
+  station?: string;
 }
 
 export default function WeatherCard({
@@ -15,6 +16,7 @@ export default function WeatherCard({
   temperature,
   temperatureUnit,
   updateTime,
+  station,
 }: WeatherCardProps) {
   return (
     <Card>
@@ -31,6 +33,11 @@ export default function WeatherCard({
             <Typography variant="caption">
               {updateTime.toLocaleString()}
             </Typography>
+          </Box>
+        )}
+        {updateTime && (
+          <Box display="flex" justifyContent="flex-end">
+            <Typography variant="caption">{station}</Typography>
           </Box>
         )}
       </CardContent>

@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useReducer, useState } from "react";
 import {
   AppBar,
+  BottomNavigation,
+  BottomNavigationAction,
   Box,
   IconButton,
   LinearProgress,
@@ -10,19 +12,22 @@ import {
 import {
   MoreVert as MoreVertIcon,
   MyLocation as MyLocationIcon,
+  Schedule as ScheduleIcon,
+  CalendarToday as CalendarTodayIcon,
 } from "@material-ui/icons";
+import { TabContext, TabPanel } from "@material-ui/lab";
 import geolocationService from "../../common/services/geolocation.service";
 import nwsService from "../../nws/services/nws.service";
 import localStorageService from "../../common/services/localStorage.service";
 import useNetworkStatus from "../../common/hooks/use-network-status";
-import WeatherCard from "../components/weather-card";
 import forecastReducer from "../reducers/forecast-reducer";
 import ForecastState from "../interfaces/forecast-state";
 import useSerializeValue from "../../common/hooks/use-serialize-value";
 import Menu from "../components/menu";
 import Coordinates from "../../common/interfaces/coordinates";
 import useStyles from "./dashboard.styles";
-import HourlyForecastGridList from "../components/hourly-forecast-grid-list";
+import HourlyForecastPage from "./hourly-forecast.page";
+import clsx from "clsx";
 
 function initializeForecastState(): ForecastState {
   return {
@@ -148,53 +153,83 @@ export default function DashboardPage() {
 
   const [menuAnchor, setMenuAnchor] = useState<null | HTMLElement>(null);
 
+  const [activeTab, setActiveTab] = useState("hourly");
+
   return (
-    <>
-      <AppBar position="sticky">
-        <Toolbar>
-          <Typography variant="h6">
-            {city || state
-              ? `${city ?? "Unknown"}, ${state ?? "Unknown"}`
-              : "Unknown"}
-          </Typography>
-          <IconButton color="inherit" onClick={updateLocation}>
-            <MyLocationIcon />
-          </IconButton>
-          <Box className={classes.spacer} />
-          <IconButton
-            color="inherit"
-            edge="end"
-            onClick={(e) => setMenuAnchor(e.currentTarget)}
+    <div className={classes.root}>
+      <TabContext value={activeTab}>
+        <AppBar position="sticky">
+          <Toolbar>
+            <Typography variant="h6">
+              {city || state
+                ? `${city ?? "Unknown"}, ${state ?? "Unknown"}`
+                : "Unknown"}
+            </Typography>
+            <IconButton color="inherit" onClick={updateLocation}>
+              <MyLocationIcon />
+            </IconButton>
+            <Box className={classes.spacer} />
+            <IconButton
+              color="inherit"
+              edge="end"
+              onClick={(e) => setMenuAnchor(e.currentTarget)}
+            >
+              <MoreVertIcon />
+            </IconButton>
+          </Toolbar>
+        </AppBar>
+        <Menu
+          anchorEl={menuAnchor}
+          open={Boolean(menuAnchor)}
+          onClose={() => setMenuAnchor(null)}
+          onRefreshClicked={() => {
+            setMenuAnchor(null);
+            if (!location || !isOnline) {
+              return;
+            }
+            updateForecast(location);
+          }}
+        />
+        {loading && <LinearProgress color="secondary" />}
+        <main className={classes.main}>
+          <TabPanel
+            value="hourly"
+            className={clsx(classes.tabPanel, classes.hourlyForecastTab)}
           >
-            <MoreVertIcon />
-          </IconButton>
-        </Toolbar>
-      </AppBar>
-      <Menu
-        anchorEl={menuAnchor}
-        open={Boolean(menuAnchor)}
-        onClose={() => setMenuAnchor(null)}
-        onRefreshClicked={() => {
-          setMenuAnchor(null);
-          if (!location || !isOnline) {
-            return;
-          }
-          updateForecast(location);
-        }}
-      />
-      {loading && <LinearProgress color="secondary" />}
-      <main className={classes.main}>
-        {currentWeather !== null && (
-          <WeatherCard
-            temperature={Math.round(currentWeather.temperature.value ?? NaN)}
-            temperatureUnit="C"
-            icon={currentWeather.icon}
-            shortForecast={currentWeather.textDescription}
-            updateTime={new Date(currentWeather.timestamp)}
+            {currentWeather && currentHourlyPeriods?.length && (
+              <HourlyForecastPage
+                updateTime={new Date(currentWeather.timestamp)}
+                station={stationId ?? ""}
+                currentWeather={{
+                  icon: currentWeather.icon,
+                  shortForecast: currentWeather.textDescription,
+                  temperature: currentWeather.temperature.value ?? 0,
+                  temperatureUnit: "C",
+                }}
+                hourlyForecast={currentHourlyPeriods}
+              />
+            )}
+          </TabPanel>
+          <TabPanel value="daily"></TabPanel>
+        </main>
+        <BottomNavigation
+          value={activeTab}
+          onChange={(e, value) => setActiveTab(value)}
+          showLabels
+          className={classes.bottomNavigation}
+        >
+          <BottomNavigationAction
+            icon={<ScheduleIcon />}
+            label="Hourly"
+            value="hourly"
           />
-        )}
-        <HourlyForecastGridList periods={currentHourlyPeriods ?? []} />
-      </main>
-    </>
+          <BottomNavigationAction
+            icon={<CalendarTodayIcon />}
+            label="Daily"
+            value="daily"
+          />
+        </BottomNavigation>
+      </TabContext>
+    </div>
   );
 }
