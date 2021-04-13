@@ -28,6 +28,7 @@ import Coordinates from "../../common/interfaces/coordinates";
 import useStyles from "./dashboard.styles";
 import HourlyForecastPage from "./hourly-forecast.page";
 import clsx from "clsx";
+import { SpeedUnit } from "../enums/speed-unit.enum";
 
 function initializeForecastState(): ForecastState {
   return {
@@ -205,6 +206,15 @@ export default function DashboardPage() {
                   shortForecast: currentWeather.textDescription,
                   temperature: currentWeather.temperature.value ?? 0,
                   temperatureUnit: "C",
+                  windSpeed:
+                    currentWeather.windSpeed.value !== null
+                      ? {
+                          value: currentWeather.windSpeed.value,
+                          unit: SpeedUnit.KilometersPerHour,
+                        }
+                      : undefined,
+                  relativeHumidity:
+                    currentWeather.relativeHumidity.value ?? undefined,
                 }}
                 hourlyForecast={currentHourlyPeriods}
               />

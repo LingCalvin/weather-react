@@ -22,6 +22,8 @@ export default function HourlyForecastPage({
         shortForecast={currentWeather.shortForecast}
         temperature={currentWeather.temperature}
         temperatureUnit={currentWeather.temperatureUnit}
+        windSpeed={currentWeather.windSpeed}
+        relativeHumidity={currentWeather.relativeHumidity}
         updateTime={updateTime}
         station={station}
       />
