@@ -145,7 +145,7 @@ export default function DashboardPage() {
   useSerializeValue("forecast", forecast);
   useSerializeValue("hourlyForecast", hourlyForecast);
   useSerializeValue("forecastState", forecastState);
-  useSerializeValue("station", stationId);
+  useSerializeValue("stationId", stationId);
   useSerializeValue("observation", observation);
 
   const transformTemperature = (temperature: Temperature): Temperature =>
