@@ -45,15 +45,17 @@ import Temperature from "../interfaces/temperature";
 import Speed from "../interfaces/speed";
 
 function initializeForecastState(): ForecastState {
-  return {
-    location: localStorageService.getItem("location"),
-    city: localStorageService.getItem("city"),
-    state: localStorageService.getItem("state"),
-    forecast: localStorageService.getItem("forecast"),
-    hourlyForecast: localStorageService.getItem("hourlyForecast"),
-    stationId: localStorageService.getItem("stationId"),
-    observation: localStorageService.getItem("observation"),
-  };
+  return (
+    localStorageService.getItem("cachedForecast") ?? {
+      location: null,
+      city: null,
+      state: null,
+      forecast: null,
+      hourlyForecast: null,
+      stationId: null,
+      observation: null,
+    }
+  );
 }
 
 /**
@@ -112,7 +114,6 @@ export default function DashboardPage() {
     location,
     city,
     state,
-    forecast,
     hourlyForecast,
     observation,
     stationId,
@@ -139,14 +140,7 @@ export default function DashboardPage() {
 
   // Save information about the last location and forecast retrieved so it can
   // be used after the application has been closed
-  useSerializeValue("location", location);
-  useSerializeValue("city", city);
-  useSerializeValue("state", state);
-  useSerializeValue("forecast", forecast);
-  useSerializeValue("hourlyForecast", hourlyForecast);
-  useSerializeValue("forecastState", forecastState);
-  useSerializeValue("stationId", stationId);
-  useSerializeValue("observation", observation);
+  useSerializeValue("cachedForecast", forecastState);
 
   const transformTemperature = (temperature: Temperature): Temperature =>
     TemperatureUtils.round(
