@@ -1,4 +1,6 @@
 import localStorageService from "../../common/services/localStorage.service";
+import { defaultSettings } from "../constants/default-settings";
+import Settings from "../interfaces/settings";
 /**
  * Returns a key for loading and saving preferences.
  *
@@ -29,10 +31,32 @@ export class SettingsService {
    * @param defaultValue - The default value to use if `key` is not found.
    * @returns The setting or null if it is not found.
    */
-  load<T>(key: string, defaultValue?: T): T | null {
-    return (
-      localStorageService.getItem(generateKey(key)) ?? defaultValue ?? null
-    );
+  load<T>(key: keyof Settings): T | null {
+    return localStorageService.getItem(generateKey(key)) ?? null;
+  }
+  /**
+   * Loads a setting.
+   *
+   * @param key - The key for the setting.
+   * @param defaultValue - The default value to use if `key` is not found.
+   * @returns The setting or null if it is not found.
+   */
+  loadOrDefault<T>(key: keyof Settings, defaultValue: T): T {
+    return localStorageService.getItem(generateKey(key)) ?? defaultValue;
+  }
+  /**
+   * Retrieves user settings.
+   *
+   * @returns All settings with either user set preferences or default values
+   */
+  loadAllOrDefault(): Settings {
+    return {
+      speedUnit: this.loadOrDefault("speedUnit", defaultSettings.speedUnit),
+      temperatureUnit: this.loadOrDefault(
+        "temperatureUnit",
+        defaultSettings.temperatureUnit
+      ),
+    };
   }
 }
 
