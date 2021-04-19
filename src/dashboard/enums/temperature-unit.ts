@@ -1,5 +1,5 @@
 export enum TemperatureUnit {
-  Celsius,
-  Fahrenheit,
-  Kelvin,
+  Celsius = "CELSIUS",
+  Fahrenheit = "FAHRENHEIT",
+  Kelvin = "KELVIN",
 }

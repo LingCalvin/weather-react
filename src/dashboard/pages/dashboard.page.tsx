@@ -1,4 +1,10 @@
-import { useCallback, useEffect, useReducer, useState } from "react";
+import {
+  useCallback,
+  useContext,
+  useEffect,
+  useReducer,
+  useState,
+} from "react";
 import {
   AppBar,
   BottomNavigation,
@@ -29,6 +35,14 @@ import useStyles from "./dashboard.styles";
 import HourlyForecastPage from "./hourly-forecast.page";
 import clsx from "clsx";
 import { SpeedUnit } from "../enums/speed-unit.enum";
+import { useHistory } from "react-router";
+import routes from "../../common/constants/routes.json";
+import { TemperatureUnit } from "../enums/temperature-unit";
+import * as TemperatureUtils from "../utils/temperature.utils";
+import * as SpeedUtils from "../utils/speed.utils";
+import { SettingsContext } from "../../settings/contexts/settings.context";
+import Temperature from "../interfaces/temperature";
+import Speed from "../interfaces/speed";
 
 function initializeForecastState(): ForecastState {
   return {
@@ -84,6 +98,8 @@ async function getForecast(location: Coordinates): Promise<ForecastState> {
 
 export default function DashboardPage() {
   const classes = useStyles();
+  const history = useHistory();
+  const { speedUnit, temperatureUnit } = useContext(SettingsContext);
   const isOnline = useNetworkStatus();
   const [loading, setLoading] = useState(false);
   const [forecastState, forecastStateDispatch] = useReducer(
@@ -131,6 +147,14 @@ export default function DashboardPage() {
   useSerializeValue("forecastState", forecastState);
   useSerializeValue("station", stationId);
   useSerializeValue("observation", observation);
+
+  const transformTemperature = (temperature: Temperature): Temperature =>
+    TemperatureUtils.round(
+      TemperatureUtils.convert(temperature, temperatureUnit)
+    );
+
+  const transformSpeed = (speed: Speed): Speed =>
+    SpeedUtils.round(SpeedUtils.convert(speed, speedUnit));
 
   const currentDate = new Date();
   const endDate = new Date(currentDate);
@@ -190,6 +214,10 @@ export default function DashboardPage() {
             }
             updateForecast(location);
           }}
+          onSettingsClicked={() => {
+            setMenuAnchor(null);
+            history.push(routes.SETTINGS);
+          }}
         />
         {loading && <LinearProgress color="secondary" />}
         <main className={classes.main}>
@@ -204,14 +232,16 @@ export default function DashboardPage() {
                 currentWeather={{
                   icon: currentWeather.icon,
                   shortForecast: currentWeather.textDescription,
-                  temperature: currentWeather.temperature.value ?? 0,
-                  temperatureUnit: "C",
+                  temperature: transformTemperature({
+                    value: currentWeather.temperature.value ?? 0,
+                    unit: TemperatureUnit.Celsius,
+                  }),
                   windSpeed:
                     currentWeather.windSpeed.value !== null
-                      ? {
+                      ? transformSpeed({
                           value: currentWeather.windSpeed.value,
                           unit: SpeedUnit.KilometersPerHour,
-                        }
+                        })
                       : undefined,
                   relativeHumidity:
                     currentWeather.relativeHumidity.value ?? undefined,

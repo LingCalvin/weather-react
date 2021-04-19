@@ -10,6 +10,7 @@ interface MenuProps {
   anchorOrigin?: MuiMenuProps["anchorOrigin"];
   onClose?: MuiMenuProps["onClose"];
   onRefreshClicked?: () => void;
+  onSettingsClicked?: () => void;
 }
 
 export default function Menu({
@@ -18,6 +19,7 @@ export default function Menu({
   anchorOrigin,
   onClose,
   onRefreshClicked,
+  onSettingsClicked,
 }: MenuProps) {
   return (
     <MuiMenu
@@ -27,6 +29,7 @@ export default function Menu({
       onClose={onClose}
     >
       <MenuItem onClick={onRefreshClicked}>Refresh</MenuItem>
+      <MenuItem onClick={onSettingsClicked}>Settings</MenuItem>
     </MuiMenu>
   );
 }

@@ -1,17 +1,16 @@
 import { Typography } from "@material-ui/core";
+import Temperature from "../interfaces/temperature";
 import * as temperatureUtils from "../utils/temperature.utils";
 import useStyles from "./hourly-forecast-grid-list-item.styles";
 
 interface HourlyForecastGridListTileProps {
-  temperature: number;
-  temperatureUnit: string;
+  temperature: Temperature;
   time: Date;
   icon: string;
 }
 
 export default function HourlyForecastGridListTile({
   temperature,
-  temperatureUnit,
   time,
   icon,
 }: HourlyForecastGridListTileProps) {
@@ -21,7 +20,7 @@ export default function HourlyForecastGridListTile({
       <Typography>{time.toLocaleTimeString()}</Typography>
       <img src={icon} alt="" />
       <Typography variant="h6">
-        {temperatureUtils.format(temperature, temperatureUnit)}
+        {temperatureUtils.format(temperature)}
       </Typography>
     </div>
   );
