@@ -31,9 +31,8 @@ import ForecastState from "../interfaces/forecast-state";
 import useSerializeValue from "../../common/hooks/use-serialize-value";
 import Menu from "../components/menu";
 import Coordinates from "../../common/interfaces/coordinates";
-import useStyles from "./dashboard.styles";
+import useStyles from "./dashboard.page.styles";
 import HourlyForecastPage from "./hourly-forecast.page";
-import clsx from "clsx";
 import { SpeedUnit } from "../enums/speed-unit.enum";
 import { useHistory } from "react-router";
 import routes from "../../common/constants/routes.json";
@@ -43,6 +42,7 @@ import * as SpeedUtils from "../utils/speed.utils";
 import { SettingsContext } from "../../settings/contexts/settings.context";
 import Temperature from "../interfaces/temperature";
 import Speed from "../interfaces/speed";
+import DailyForecastPage from "./daily-forecast.page";
 
 function initializeForecastState(): ForecastState {
   return (
@@ -114,6 +114,7 @@ export default function DashboardPage() {
     location,
     city,
     state,
+    forecast,
     hourlyForecast,
     observation,
     stationId,
@@ -215,12 +216,10 @@ export default function DashboardPage() {
         />
         {loading && <LinearProgress color="secondary" />}
         <main className={classes.main}>
-          <TabPanel
-            value="hourly"
-            className={clsx(classes.tabPanel, classes.hourlyForecastTab)}
-          >
+          <TabPanel value="hourly">
             {currentWeather && currentHourlyPeriods?.length && (
               <HourlyForecastPage
+                className={classes.hourlyForecastPage}
                 updateTime={new Date(currentWeather.timestamp)}
                 station={stationId ?? ""}
                 currentWeather={{
@@ -244,7 +243,9 @@ export default function DashboardPage() {
               />
             )}
           </TabPanel>
-          <TabPanel value="daily"></TabPanel>
+          <TabPanel value="daily">
+            <DailyForecastPage forecast={forecast?.properties.periods ?? []} />
+          </TabPanel>
         </main>
         <BottomNavigation
           value={activeTab}

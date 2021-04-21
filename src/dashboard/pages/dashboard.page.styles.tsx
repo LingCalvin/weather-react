@@ -13,7 +13,7 @@ const useStyles = makeStyles((theme) => ({
     overflowY: "auto",
     flexGrow: 1,
   },
-  hourlyForecastTab: {
+  hourlyForecastPage: {
     display: "flex",
     flexDirection: "column",
     gap: theme.spacing(1),
@@ -21,10 +21,8 @@ const useStyles = makeStyles((theme) => ({
   bottomNavigation: {
     borderTop: "1px solid",
     borderColor: theme.palette.divider,
-  },
-  tabPanel: {
-    paddingLeft: theme.spacing(2),
-    paddingRight: theme.spacing(2),
+    // Prevent the navigation bar from changing height when changing tabs
+    minHeight: "56px",
   },
 }));
 

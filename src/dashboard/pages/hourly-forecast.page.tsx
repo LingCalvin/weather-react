@@ -7,6 +7,7 @@ interface HourlyForecastPageProps {
   hourlyForecast: Period[];
   updateTime: Date;
   station: string;
+  className?: string;
 }
 
 export default function HourlyForecastPage({
@@ -14,9 +15,10 @@ export default function HourlyForecastPage({
   hourlyForecast,
   updateTime,
   station,
+  className,
 }: HourlyForecastPageProps) {
   return (
-    <>
+    <div className={className}>
       <WeatherCard
         icon={currentWeather.icon}
         shortForecast={currentWeather.shortForecast}
@@ -27,6 +29,6 @@ export default function HourlyForecastPage({
         station={station}
       />
       <HourlyForecastGridList periods={hourlyForecast} />
-    </>
+    </div>
   );
 }
