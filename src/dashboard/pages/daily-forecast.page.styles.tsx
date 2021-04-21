@@ -1,7 +1,7 @@
 import { makeStyles } from "@material-ui/core";
 
 const useStyles = makeStyles((theme) => ({
-  cardContent: {
+  root: {
     display: "flex",
     flexDirection: "column",
     gap: theme.spacing(2),
@@ -13,6 +13,7 @@ const useStyles = makeStyles((theme) => ({
     "forecastTileIcon forecastTileDescription forecastTileTemperature"
     `,
     alignItems: "center",
+    columnGap: theme.spacing(1),
   },
   forecastTileTitle: {
     gridArea: "forecastTileTitle",
