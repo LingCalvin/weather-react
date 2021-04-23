@@ -12,8 +12,8 @@ import {
 import { ArrowBack as ArrowBackIcon } from "@material-ui/icons";
 import { useContext, useState } from "react";
 import { useHistory } from "react-router";
-import { SpeedUnit } from "../../dashboard/enums/speed-unit.enum";
-import { TemperatureUnit } from "../../dashboard/enums/temperature-unit";
+import { SpeedUnit } from "../../nws/enums/speed-unit";
+import { TemperatureUnit } from "../../nws/enums/temperature-unit";
 import UnitMenu from "../components/unit-menu";
 import { SettingsUpdateContext } from "../contexts/settings-update.context";
 import { SettingsContext } from "../contexts/settings.context";
@@ -67,6 +67,7 @@ export default function SettingsPage() {
       >
         {speedUnits.map((unit) => (
           <MenuItem
+            key={unit}
             onClick={() => {
               updateSettings({ speedUnit: unit });
               setSpeedUnitMenuAnchor(null);
@@ -83,6 +84,7 @@ export default function SettingsPage() {
       >
         {temperatureUnits.map((unit) => (
           <MenuItem
+            key={unit}
             onClick={() => {
               updateSettings({ temperatureUnit: unit });
               setTemperatureUnitMenuAnchor(null);

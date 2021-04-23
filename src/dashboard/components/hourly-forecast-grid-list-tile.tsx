@@ -1,5 +1,5 @@
 import { Typography } from "@material-ui/core";
-import Temperature from "../interfaces/temperature";
+import { Temperature } from "../../nws/types/temperature";
 import * as temperatureUtils from "../utils/temperature.utils";
 import useStyles from "./hourly-forecast-grid-list-item.styles";
 

@@ -1,4 +1,4 @@
-import { Period } from "../../nws/interfaces/forecast-response";
+import { Period } from "../../nws/interfaces/forecast";
 import HourlyForecastGridList from "../components/hourly-forecast-grid-list";
 import WeatherCard, { WeatherCardProps } from "../components/weather-card";
 

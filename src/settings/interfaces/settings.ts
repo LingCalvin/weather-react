@@ -1,5 +1,5 @@
-import { SpeedUnit } from "../../dashboard/enums/speed-unit.enum";
-import { TemperatureUnit } from "../../dashboard/enums/temperature-unit";
+import { SpeedUnit } from "../../nws/enums/speed-unit";
+import { TemperatureUnit } from "../../nws/enums/temperature-unit";
 
 /** User settings interface. */
 export default interface Settings {

@@ -1,13 +1,13 @@
 import Coordinates from "../../common/interfaces/coordinates";
-import ForecastResponse from "../../nws/interfaces/forecast-response";
-import StationObservationsResponse from "../../nws/interfaces/station-observations-response";
+import { Forecast } from "../../nws/interfaces/forecast";
+import { Observation } from "../../nws/interfaces/observation";
 
 export default interface ForecastState {
   city: string | null;
   state: string | null;
   location: Coordinates | null;
-  forecast: ForecastResponse | null;
-  hourlyForecast: ForecastResponse | null;
+  forecast: Forecast | null;
+  hourlyForecast: Forecast | null;
   stationId: string | null;
-  observation: StationObservationsResponse | null;
+  observations: Observation[] | null;
 }

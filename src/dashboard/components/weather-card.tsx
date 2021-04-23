@@ -1,6 +1,6 @@
 import { Box, Card, CardContent, Typography } from "@material-ui/core";
-import Speed from "../interfaces/speed";
-import Temperature from "../interfaces/temperature";
+import { Speed } from "../../nws/types/speed";
+import { Temperature } from "../../nws/types/temperature";
 import * as SpeedUtils from "../utils/speed.utils";
 import * as TemperatureUtils from "../utils/temperature.utils";
 

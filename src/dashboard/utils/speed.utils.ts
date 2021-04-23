@@ -1,5 +1,5 @@
-import { SpeedUnit } from "../enums/speed-unit.enum";
-import Speed from "../interfaces/speed";
+import { SpeedUnit } from "../../nws/enums/speed-unit";
+import { Speed } from "../../nws/types/speed";
 
 /**
  * Returns a formatted speed string.

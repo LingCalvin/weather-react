@@ -1,4 +1,4 @@
-import { SpeedUnit } from "../../dashboard/enums/speed-unit.enum";
+import { SpeedUnit } from "../../nws/enums/speed-unit";
 
 export function toString(speedUnit: SpeedUnit): string {
   switch (speedUnit) {

@@ -1,4 +1,4 @@
-import { TemperatureUnit } from "../../dashboard/enums/temperature-unit";
+import { TemperatureUnit } from "../../nws/enums/temperature-unit";
 
 export function toString(temperatureUnit: TemperatureUnit): string {
   switch (temperatureUnit) {

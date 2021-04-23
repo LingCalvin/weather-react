@@ -2,6 +2,7 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useMemo,
   useReducer,
   useState,
 } from "react";
@@ -33,27 +34,34 @@ import Menu from "../components/menu";
 import Coordinates from "../../common/interfaces/coordinates";
 import useStyles from "./dashboard.page.styles";
 import HourlyForecastPage from "./hourly-forecast.page";
-import { SpeedUnit } from "../enums/speed-unit.enum";
 import { useHistory } from "react-router";
 import routes from "../../common/constants/routes.json";
-import { TemperatureUnit } from "../enums/temperature-unit";
 import * as TemperatureUtils from "../utils/temperature.utils";
 import * as SpeedUtils from "../utils/speed.utils";
 import { SettingsContext } from "../../settings/contexts/settings.context";
-import Temperature from "../interfaces/temperature";
-import Speed from "../interfaces/speed";
 import DailyForecastPage from "./daily-forecast.page";
+import { SpeedUnit } from "../../nws/enums/speed-unit";
+import { TemperatureUnit } from "../../nws/enums/temperature-unit";
+import { Speed } from "../../nws/types/speed";
+import { Temperature } from "../../nws/types/temperature";
+import { Forecast } from "../../nws/interfaces/forecast";
 
 function initializeForecastState(): ForecastState {
   return (
-    localStorageService.getItem("cachedForecast") ?? {
+    localStorageService.getItem("cachedForecast", (key, value) => {
+      const upperCasedKey = key.toLocaleUpperCase();
+      if (upperCasedKey.includes("TIME") || upperCasedKey.includes("DATE")) {
+        return new Date(value);
+      }
+      return value;
+    }) ?? {
       location: null,
       city: null,
       state: null,
       forecast: null,
       hourlyForecast: null,
       stationId: null,
-      observation: null,
+      observations: null,
     }
   );
 }
@@ -66,24 +74,20 @@ function initializeForecastState(): ForecastState {
  */
 async function getForecast(location: Coordinates): Promise<ForecastState> {
   const {
-    properties: {
-      relativeLocation: {
-        properties: { city, state },
-      },
-      gridId: wfo,
-      gridX: x,
-      gridY: y,
-    },
+    relativeLocation: { city, state },
+    gridId: wfo,
+    gridX: x,
+    gridY: y,
   } = await nwsService.getPointInfo(location.latitude, location.longitude);
-  const forecastRes = await nwsService.getForecast({ wfo, x, y });
-  const hourlyForecastRes = await nwsService.getHourlyForecast({
+  const forecast = await nwsService.getForecast({ wfo, x, y });
+  const hourlyForecast = await nwsService.getHourlyForecast({
     wfo,
     x,
     y,
   });
-  const stationsRes = await nwsService.getStations({ wfo, x, y });
-  const stationId = stationsRes.features[0].properties.stationIdentifier;
-  const observationRes = await nwsService.getStationObservations({
+  const stations = await nwsService.getStations({ wfo, x, y });
+  const { id: stationId } = stations[0];
+  const observations = await nwsService.getStationObservations({
     stationId,
     limit: 1, // Only get the most recent observation
   });
@@ -91,10 +95,10 @@ async function getForecast(location: Coordinates): Promise<ForecastState> {
     location,
     city,
     state,
-    forecast: forecastRes,
-    hourlyForecast: hourlyForecastRes,
+    forecast,
+    hourlyForecast,
     stationId,
-    observation: observationRes,
+    observations,
   };
 }
 
@@ -116,11 +120,11 @@ export default function DashboardPage() {
     state,
     forecast,
     hourlyForecast,
-    observation,
+    observations,
     stationId,
   } = forecastState;
 
-  const currentWeather = observation?.features[0].properties ?? null;
+  const currentWeather = observations?.[0] ?? null;
 
   const updateForecast = useCallback((location: Coordinates) => {
     setLoading(true);
@@ -143,22 +147,53 @@ export default function DashboardPage() {
   // be used after the application has been closed
   useSerializeValue("cachedForecast", forecastState);
 
-  const transformTemperature = (temperature: Temperature): Temperature =>
-    TemperatureUtils.round(
-      TemperatureUtils.convert(temperature, temperatureUnit)
-    );
+  const transformTemperature = useCallback(
+    (temperature: Temperature): Temperature =>
+      TemperatureUtils.round(
+        TemperatureUtils.convert(temperature, temperatureUnit)
+      ),
+    [temperatureUnit]
+  );
 
   const transformSpeed = (speed: Speed): Speed =>
     SpeedUtils.round(SpeedUtils.convert(speed, speedUnit));
+
+  const transformForecast = useCallback(
+    (forecast: Forecast): Forecast => {
+      return {
+        ...forecast,
+        periods: forecast.periods.map(({ temperature, ...rest }) => ({
+          temperature: transformTemperature(temperature),
+          ...rest,
+        })),
+      };
+    },
+    [transformTemperature]
+  );
+
+  const transformedForecast = useMemo(
+    () => (forecast !== null ? transformForecast(forecast) : null),
+    [forecast, transformForecast]
+  );
+
+  const transformedHourlyForecast = useMemo(
+    () => (hourlyForecast !== null ? transformForecast(hourlyForecast) : null),
+    [hourlyForecast, transformForecast]
+  );
 
   const currentDate = new Date();
   const endDate = new Date(currentDate);
   endDate.setDate(endDate.getDate() + 1);
   endDate.setHours(0, 0, 0, 0);
-  const currentHourlyPeriods = hourlyForecast?.properties.periods.filter(
-    ({ endTime, startTime }) =>
-      new Date(endTime) > currentDate && new Date(startTime) < endDate
-  );
+  const currentHourlyPeriods = transformedHourlyForecast?.periods
+    .filter(
+      ({ endTime, startTime }) =>
+        new Date(endTime) > currentDate && new Date(startTime) < endDate
+    )
+    .map(({ temperature, ...rest }) => ({
+      temperature: transformTemperature(temperature),
+      ...rest,
+    }));
 
   const updateLocation = () => {
     geolocationService.getCurrentPosition().then(({ coords }) => {
@@ -224,27 +259,26 @@ export default function DashboardPage() {
                 station={stationId ?? ""}
                 currentWeather={{
                   icon: currentWeather.icon,
-                  shortForecast: currentWeather.textDescription,
+                  shortForecast: currentWeather.description,
                   temperature: transformTemperature({
-                    value: currentWeather.temperature.value ?? 0,
+                    value: currentWeather.temperature?.value ?? 0,
                     unit: TemperatureUnit.Celsius,
                   }),
                   windSpeed:
-                    currentWeather.windSpeed.value !== null
+                    currentWeather?.windSpeed !== undefined
                       ? transformSpeed({
                           value: currentWeather.windSpeed.value,
                           unit: SpeedUnit.KilometersPerHour,
                         })
                       : undefined,
-                  relativeHumidity:
-                    currentWeather.relativeHumidity.value ?? undefined,
+                  relativeHumidity: currentWeather.relativeHumidity,
                 }}
                 hourlyForecast={currentHourlyPeriods}
               />
             )}
           </TabPanel>
           <TabPanel value="daily">
-            <DailyForecastPage forecast={forecast?.properties.periods ?? []} />
+            <DailyForecastPage forecast={transformedForecast?.periods ?? []} />
           </TabPanel>
         </main>
         <BottomNavigation

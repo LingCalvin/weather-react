@@ -1,5 +1,5 @@
-import { TemperatureUnit } from "../enums/temperature-unit";
-import Temperature from "../interfaces/temperature";
+import { TemperatureUnit } from "../../nws/enums/temperature-unit";
+import { Temperature } from "../../nws/types/temperature";
 
 /**
  * Returns a formatted temperature string.

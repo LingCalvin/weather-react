@@ -11,12 +11,15 @@ function setItem(key: string, value: any) {
  * returned. Otherwise, the result of calling `JSON.parse()` with the value is
  * returned.
  */
-function getItem(key: string): any | null {
+function getItem(
+  key: string,
+  reviver?: (this: any, key: string, value: any) => any
+): any | null {
   const value = localStorage.getItem(key);
   if (value === null) {
     return null;
   }
-  return JSON.parse(value);
+  return JSON.parse(value, reviver);
 }
 
 /**
