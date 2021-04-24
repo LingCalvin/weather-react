@@ -2,6 +2,7 @@ import { Typography } from "@material-ui/core";
 import { Period } from "../../nws/interfaces/forecast";
 import useStyles from "./daily-forecast.page.styles";
 import * as TemperatureUtils from "../utils/temperature.utils";
+import Image from "../../common/components/image";
 
 interface DailyForecastPageProps {
   forecast: Period[];
@@ -21,7 +22,12 @@ export default function DailyForecastPage({
           <Typography className={classes.forecastTileTitle} variant="h6">
             {period.name}
           </Typography>
-          <img className={classes.forecastTileIcon} src={period.icon} alt="" />
+          <Image
+            className={classes.forecastTileIcon}
+            src={period.icon}
+            alt=""
+            skeletonProps={{ height: 86, width: 86 }}
+          />
           <Typography className={classes.forecastTileDescription}>
             {period.shortForecast}
           </Typography>
