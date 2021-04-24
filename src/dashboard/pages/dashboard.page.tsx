@@ -25,7 +25,7 @@ import {
 import { TabContext, TabPanel } from "@material-ui/lab";
 import geolocationService from "../../common/services/geolocation.service";
 import nwsService from "../../nws/services/nws.service";
-import localStorageService from "../../common/services/localStorage.service";
+import localStorageService from "../../common/services/local-storage.service";
 import useNetworkStatus from "../../common/hooks/use-network-status";
 import forecastReducer from "../reducers/forecast-reducer";
 import ForecastState from "../interfaces/forecast-state";

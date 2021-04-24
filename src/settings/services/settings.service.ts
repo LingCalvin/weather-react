@@ -1,4 +1,4 @@
-import localStorageService from "../../common/services/localStorage.service";
+import localStorageService from "../../common/services/local-storage.service";
 import { defaultSettings } from "../constants/default-settings";
 import Settings from "../interfaces/settings";
 /**

@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import localStorageService from "../services/localStorage.service";
+import localStorageService from "../services/local-storage.service";
 
 /**
  * Writes a value to localStorage whenever the value changes.
