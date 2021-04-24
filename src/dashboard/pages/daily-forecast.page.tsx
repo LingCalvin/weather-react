@@ -3,6 +3,7 @@ import { Period } from "../../nws/interfaces/forecast";
 import useStyles from "./daily-forecast.page.styles";
 import * as TemperatureUtils from "../utils/temperature.utils";
 import Image from "../../common/components/image";
+import { NWSIconSize } from "../enums/nws-icon-size";
 
 interface DailyForecastPageProps {
   forecast: Period[];
@@ -26,7 +27,10 @@ export default function DailyForecastPage({
             className={classes.forecastTileIcon}
             src={period.icon}
             alt=""
-            skeletonProps={{ height: 86, width: 86 }}
+            skeletonProps={{
+              height: NWSIconSize.Medium,
+              width: NWSIconSize.Medium,
+            }}
           />
           <Typography className={classes.forecastTileDescription}>
             {period.shortForecast}

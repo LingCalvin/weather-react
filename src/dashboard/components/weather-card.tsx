@@ -2,8 +2,10 @@ import { Box, Card, CardContent, Typography } from "@material-ui/core";
 import Image from "../../common/components/image";
 import { Speed } from "../../nws/types/speed";
 import { Temperature } from "../../nws/types/temperature";
+import { NWSIconSize } from "../enums/nws-icon-size";
 import * as SpeedUtils from "../utils/speed.utils";
 import * as TemperatureUtils from "../utils/temperature.utils";
+import useStyles from "./weather-card.styles";
 
 export interface WeatherCardProps {
   icon: string;
@@ -24,12 +26,21 @@ export default function WeatherCard({
   updateTime,
   station,
 }: WeatherCardProps) {
+  const classes = useStyles();
   return (
     <Card>
       <CardContent>
         <Typography variant="h5">{shortForecast}</Typography>
         <Box display="flex" justifyContent="space-between" alignItems="center">
-          <Image alt="" src={icon} skeletonProps={{ height: 86, width: 86 }} />
+          <Image
+            className={classes.icon}
+            alt=""
+            src={icon}
+            skeletonProps={{
+              height: NWSIconSize.Medium,
+              width: NWSIconSize.Medium,
+            }}
+          />
           <Box display="flex" flexDirection="column" alignItems="flex-end">
             <Typography variant="h3">
               {TemperatureUtils.format(temperature)}
@@ -42,20 +53,20 @@ export default function WeatherCard({
             {windSpeed !== undefined && (
               <Typography>{`Wind: ${SpeedUtils.format(windSpeed)}`}</Typography>
             )}
+            {updateTime && (
+              <Box display="flex" justifyContent="flex-end">
+                <Typography variant="caption">
+                  {updateTime.toLocaleString()}
+                </Typography>
+              </Box>
+            )}
+            {updateTime && (
+              <Box display="flex" justifyContent="flex-end">
+                <Typography variant="caption">{station}</Typography>
+              </Box>
+            )}
           </Box>
         </Box>
-        {updateTime && (
-          <Box display="flex" justifyContent="flex-end">
-            <Typography variant="caption">
-              {updateTime.toLocaleString()}
-            </Typography>
-          </Box>
-        )}
-        {updateTime && (
-          <Box display="flex" justifyContent="flex-end">
-            <Typography variant="caption">{station}</Typography>
-          </Box>
-        )}
       </CardContent>
     </Card>
   );
