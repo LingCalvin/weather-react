@@ -23,6 +23,8 @@ export default function HourlyForecastGridListTile({
       <Image
         src={icon}
         alt=""
+        height={NWSIconSize.Small}
+        width={NWSIconSize.Small}
         skeletonProps={{ height: NWSIconSize.Small, width: NWSIconSize.Small }}
       />
       <Typography variant="h6">

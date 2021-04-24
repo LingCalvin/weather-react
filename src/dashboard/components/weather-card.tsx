@@ -36,6 +36,8 @@ export default function WeatherCard({
             className={classes.icon}
             alt=""
             src={icon}
+            height={NWSIconSize.Medium}
+            width={NWSIconSize.Medium}
             skeletonProps={{
               height: NWSIconSize.Medium,
               width: NWSIconSize.Medium,

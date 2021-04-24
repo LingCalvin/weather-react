@@ -27,6 +27,8 @@ export default function DailyForecastPage({
             className={classes.forecastTileIcon}
             src={period.icon}
             alt=""
+            height={NWSIconSize.Medium}
+            width={NWSIconSize.Medium}
             skeletonProps={{
               height: NWSIconSize.Medium,
               width: NWSIconSize.Medium,
