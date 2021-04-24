@@ -1,7 +1,10 @@
 import axios, { AxiosInstance } from "axios";
+import { DistanceUnit } from "../enums/distance-unit";
 import { ForecastType } from "../enums/forecast-type";
+import { PressureUnit } from "../enums/pressure-unit";
 import { SpeedUnit } from "../enums/speed-unit";
 import { TemperatureUnit } from "../enums/temperature-unit";
+import UnexpectedUnitCodeException from "../exceptions/unexpected-unit-code.exceptions";
 import { Forecast, Period } from "../interfaces/forecast";
 import ForecastResponse, {
   Period as RawPeriod,
@@ -12,6 +15,8 @@ import PointInfoResponse from "../interfaces/point-info-response";
 import { Station } from "../interfaces/station";
 import StationObservationsResponse from "../interfaces/station-observations-response";
 import StationsResponse from "../interfaces/stations-response";
+import { Distance } from "../types/distance";
+import { Pressure } from "../types/pressure";
 import { Speed } from "../types/speed";
 import { Temperature } from "../types/temperature";
 
@@ -111,28 +116,29 @@ class NWSService {
       timestamp: new Date(properties.timestamp),
       description: properties.textDescription,
       icon: properties.icon,
-      temperature:
-        properties.temperature.value !== null
-          ? convertTemperature(
-              properties.temperature.value,
-              properties.temperature.unitCode
-            )
-          : undefined,
+      temperature: convertTemperature(properties.temperature),
       windDirection: properties.windDirection.value ?? undefined,
-      windSpeed:
-        properties.windSpeed.value !== null
-          ? convertSpeed(
-              properties.windSpeed.value,
-              properties.windSpeed.unitCode
-            )
-          : undefined,
-      windGust:
-        properties.windGust.value !== null
-          ? convertSpeed(
-              properties.windGust.value,
-              properties.windGust.unitCode
-            )
-          : undefined,
+      windSpeed: convertSpeed(properties.windSpeed),
+      windGust: convertSpeed(properties.windGust),
+      barometricPressure: convertPressure(properties.barometricPressure),
+      seaLevelPressure: convertPressure(properties.seaLevelPressure),
+      visibility: convertDistance(properties.visibility),
+      maxTemperatureLast24Hours: convertTemperature(
+        properties.maxTemperatureLast24Hours
+      ),
+      minTemperatureLast24Hours: convertTemperature(
+        properties.minTemperatureLast24Hours
+      ),
+      precipitationLastHour: convertDistance(properties.precipitationLastHour),
+      precipitationLast3Hours: convertDistance(
+        properties.precipitationLast3Hours
+      ),
+      precipitationLast6Hours: convertDistance(
+        properties.precipitationLast6Hours
+      ),
+      relativeHumidity: convertRelativeHumidity(properties.relativeHumidity),
+      windChill: convertTemperature(properties.windChill),
+      heatIndex: convertTemperature(properties.heatIndex),
     }));
   }
 }
@@ -160,18 +166,7 @@ const nwsService = new NWSService(
 
 export default nwsService;
 
-function convertTemperature(value: number, unit: string): Temperature {
-  if (unit === "C" || unit === "unit:degC") {
-    return { value, unit: TemperatureUnit.Celsius };
-  }
-  if (unit === "F") {
-    return { value, unit: TemperatureUnit.Fahrenheit };
-  }
-  if (unit === "K") {
-    return { value, unit: TemperatureUnit.Kelvin };
-  }
-  throw new Error("Unexpected unit code.");
-}
+// Internal conversion functions
 
 function convertRawPeriodToPeriod(rawPeriod: RawPeriod): Period {
   return {
@@ -179,10 +174,10 @@ function convertRawPeriodToPeriod(rawPeriod: RawPeriod): Period {
     startTime: new Date(rawPeriod.startTime),
     endTime: new Date(rawPeriod.endTime),
     isDayTime: rawPeriod.isDaytime,
-    temperature: convertTemperature(
-      rawPeriod.temperature,
-      rawPeriod.temperatureUnit
-    ),
+    temperature: convertTemperature({
+      value: rawPeriod.temperature,
+      unitCode: rawPeriod.temperatureUnit,
+    }),
     icon: rawPeriod.icon,
     shortForecast: rawPeriod.shortForecast,
     detailedForecast: rawPeriod.detailedForecast,
@@ -199,9 +194,92 @@ function convertForecastResponseToForecast({
   };
 }
 
-function convertSpeed(value: number, unit: string): Speed {
-  if (unit === "unit:km_h-1") {
+function convertDistance({
+  value,
+  unitCode,
+}: PossiblyNullValueWithUnitCode): Distance | undefined {
+  if (value === null) {
+    return undefined;
+  }
+  if (unitCode === "unit:in") {
+    return { value, unit: DistanceUnit.Inch };
+  }
+  if (unitCode === "unit:m") {
+    return { value, unit: DistanceUnit.Meter };
+  }
+  if (unitCode === "unit:km") {
+    return { value, unit: DistanceUnit.Kilometer };
+  }
+  throw new UnexpectedUnitCodeException(unitCode);
+}
+
+function convertRelativeHumidity({
+  value,
+  unitCode,
+}: PossiblyNullValueWithUnitCode): number | undefined {
+  if (value === null) {
+    return undefined;
+  }
+  if (unitCode === "unit:percent") {
+    return value;
+  }
+  throw new UnexpectedUnitCodeException(unitCode);
+}
+
+function convertSpeed({
+  value,
+  unitCode,
+}: PossiblyNullValueWithUnitCode): Speed | undefined {
+  if (value === null) {
+    return undefined;
+  }
+  if (unitCode === "unit:km_h-1") {
     return { value, unit: SpeedUnit.KilometersPerHour };
   }
-  throw new Error("Unexpected unit code.");
+  throw new UnexpectedUnitCodeException(unitCode);
 }
+
+function convertTemperature(params: {
+  value: null;
+  unitCode: string;
+}): undefined;
+function convertTemperature(params: {
+  value: number;
+  unitCode: string;
+}): Temperature;
+function convertTemperature(
+  params: PossiblyNullValueWithUnitCode
+): Temperature | undefined;
+function convertTemperature({
+  value,
+  unitCode,
+}: PossiblyNullValueWithUnitCode): Temperature | undefined {
+  if (value === null) {
+    return undefined;
+  }
+  if (unitCode === "C" || unitCode === "unit:degC") {
+    return { value, unit: TemperatureUnit.Celsius };
+  }
+  if (unitCode === "F") {
+    return { value, unit: TemperatureUnit.Fahrenheit };
+  }
+  if (unitCode === "K") {
+    return { value, unit: TemperatureUnit.Kelvin };
+  }
+  throw new UnexpectedUnitCodeException(unitCode);
+}
+
+function convertPressure({
+  value,
+  unitCode,
+}: PossiblyNullValueWithUnitCode): Pressure | undefined {
+  if (value === null) {
+    return undefined;
+  }
+  if (unitCode === "unit:Pa") {
+    return { value, unit: PressureUnit.Pascal };
+  }
+  throw new UnexpectedUnitCodeException(unitCode);
+}
+
+type PossiblyNullValueWithUnitCode = { value: number | null; unitCode: string };
