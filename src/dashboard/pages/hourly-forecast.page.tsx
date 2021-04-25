@@ -1,5 +1,5 @@
 import { Period } from "../../nws/interfaces/forecast";
-import HourlyForecastGridList from "../components/hourly-forecast-grid-list";
+import HourlyForecast from "../components/hourly-forecast";
 import WeatherCard, { WeatherCardProps } from "../components/weather-card";
 
 interface HourlyForecastPageProps {
@@ -28,7 +28,7 @@ export default function HourlyForecastPage({
         updateTime={updateTime}
         station={station}
       />
-      <HourlyForecastGridList periods={hourlyForecast} />
+      <HourlyForecast forecast={hourlyForecast} />
     </div>
   );
 }

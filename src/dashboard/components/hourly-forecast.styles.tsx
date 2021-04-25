@@ -2,10 +2,13 @@ import { makeStyles } from "@material-ui/core";
 
 const useStyles = makeStyles((theme) => ({
   root: {
-    display: "flex",
-    flexDirection: "column",
+    display: "grid",
     alignItems: "center",
+    gridTemplateColumns: "repeat(4, auto)",
     gap: theme.spacing(1),
+  },
+  temperature: {
+    fontWeight: "bold",
   },
 }));
 
