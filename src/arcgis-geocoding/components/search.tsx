@@ -1,4 +1,4 @@
-import { TextField, TextFieldProps } from "@material-ui/core";
+import { InputAdornment, InputProps, TextField } from "@material-ui/core";
 import { Autocomplete } from "@material-ui/lab";
 import { useEffect, useRef, useState } from "react";
 import useDebouncedValue from "../../common/hooks/use-debounced-value";
@@ -9,18 +9,18 @@ import arcGISGeocodingService from "../services/arcgis-geocoding.service";
 
 interface SearchProps {
   onSelectionChange: (value: Candidate) => void;
-  textFieldProps?: TextFieldProps;
   fullWidth?: boolean;
   className?: string;
   suggestParams?: Omit<SuggestParams, "text" | "f">;
+  startAdornment?: InputProps["startAdornment"];
 }
 
 export default function Search({
   onSelectionChange,
-  textFieldProps,
   fullWidth,
   className,
   suggestParams,
+  startAdornment,
 }: SearchProps) {
   const [value, setValue] = useState<Suggestion | null>(null);
   const [inputValue, setInputValue] = useState("");
@@ -82,8 +82,10 @@ export default function Search({
           {...params}
           InputProps={{
             ...params.InputProps,
+            startAdornment: startAdornment ? (
+              <InputAdornment position="start">{startAdornment}</InputAdornment>
+            ) : undefined,
           }}
-          {...textFieldProps}
         />
       )}
     />

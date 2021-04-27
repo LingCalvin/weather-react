@@ -243,25 +243,30 @@ export default function DashboardPage() {
                 </IconButton>
               </>
             ) : (
-              <div className={classes.searchContainer}>
+              <div className={classes.searchOrLocateContainer}>
+                <div className={classes.searchContainer}>
+                  <Search
+                    fullWidth
+                    startAdornment={
+                      <IconButton
+                        className={classes.searchExitButton}
+                        onClick={() => setShowSearch(false)}
+                      >
+                        <ArrowBackIcon />
+                      </IconButton>
+                    }
+                    suggestParams={{
+                      category: ["Postal", "Populated Place"],
+                      countryCode: "USA",
+                    }}
+                    onSelectionChange={({ location: { x, y } }) => {
+                      setShowSearch(false);
+                      updateLocation(y, x);
+                    }}
+                  />
+                </div>
                 <IconButton
-                  className={classes.searchExitButton}
-                  onClick={() => setShowSearch(false)}
-                >
-                  <ArrowBackIcon />
-                </IconButton>
-                <Search
-                  fullWidth
-                  suggestParams={{
-                    category: ["Postal", "Populated Place"],
-                    countryCode: "USA",
-                  }}
-                  onSelectionChange={({ location: { x, y } }) => {
-                    setShowSearch(false);
-                    updateLocation(y, x);
-                  }}
-                />
-                <IconButton
+                  color="inherit"
                   className={classes.searchExitButton}
                   onClick={() => {
                     setShowSearch(false);

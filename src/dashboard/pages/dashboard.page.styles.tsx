@@ -32,6 +32,13 @@ const useStyles = makeStyles((theme) => ({
     alignItems: "center",
     gap: theme.spacing(1),
     borderRadius: theme.shape.borderRadius,
+    flexGrow: 1,
+  },
+  searchOrLocateContainer: {
+    width: "100%",
+    display: "flex",
+    alignItems: "center",
+    gap: theme.spacing(1),
   },
   searchExitButton: {
     padding: 0,
