@@ -1,5 +1,5 @@
 import { InputAdornment, InputProps, TextField } from "@material-ui/core";
-import { Autocomplete } from "@material-ui/lab";
+import { Autocomplete, AutocompleteProps } from "@material-ui/lab";
 import { useEffect, useRef, useState } from "react";
 import useDebouncedValue from "../../common/hooks/use-debounced-value";
 import Candidate from "../interfaces/candidate";
@@ -8,19 +8,31 @@ import Suggestion from "../interfaces/suggestion";
 import arcGISGeocodingService from "../services/arcgis-geocoding.service";
 
 interface SearchProps {
-  onSelectionChange: (value: Candidate) => void;
-  fullWidth?: boolean;
-  className?: string;
   suggestParams?: Omit<SuggestParams, "text" | "f">;
   startAdornment?: InputProps["startAdornment"];
+  autocompleteProps?: Omit<
+    AutocompleteProps<Suggestion, undefined, undefined, undefined>,
+    | "options"
+    | "getOptionLabel"
+    | "getOptionSelected"
+    | "inputValue"
+    | "onInputChange"
+    | "value"
+    | "onChange"
+    | "renderInput"
+  >;
+  autoFocus?: boolean;
+  placeholder?: string;
+  onSelectionChange?: (value: Candidate) => void;
 }
 
 export default function Search({
-  onSelectionChange,
-  fullWidth,
-  className,
   suggestParams,
   startAdornment,
+  autocompleteProps,
+  autoFocus,
+  placeholder,
+  onSelectionChange,
 }: SearchProps) {
   const [value, setValue] = useState<Suggestion | null>(null);
   const [inputValue, setInputValue] = useState("");
@@ -50,8 +62,6 @@ export default function Search({
 
   return (
     <Autocomplete
-      className={className}
-      fullWidth={fullWidth}
       options={suggestions}
       getOptionLabel={(option) => option.text}
       getOptionSelected={(option, value) => {
@@ -74,8 +84,10 @@ export default function Search({
             f: "json",
             SingeLine: value?.text,
             magicKey: value?.magicKey,
+            maxLocations: 1,
+            outFields: ["City", "RegionAbbr"],
           })
-          .then((candidates) => onSelectionChange(candidates[0]));
+          .then((candidates) => onSelectionChange?.(candidates[0]));
       }}
       renderInput={(params) => (
         <TextField
@@ -86,8 +98,11 @@ export default function Search({
               <InputAdornment position="start">{startAdornment}</InputAdornment>
             ) : undefined,
           }}
+          autoFocus={autoFocus}
+          placeholder={placeholder}
         />
       )}
+      {...autocompleteProps}
     />
   );
 }

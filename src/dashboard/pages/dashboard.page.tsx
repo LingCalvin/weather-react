@@ -7,25 +7,15 @@ import {
   useState,
 } from "react";
 import {
-  AppBar,
   BottomNavigation,
   BottomNavigationAction,
-  Box,
-  IconButton,
   LinearProgress,
-  Toolbar,
-  Typography,
 } from "@material-ui/core";
 import {
-  ArrowBack as ArrowBackIcon,
-  MoreVert as MoreVertIcon,
-  MyLocation as MyLocationIcon,
   Schedule as ScheduleIcon,
-  Search as SearchIcon,
   CalendarToday as CalendarTodayIcon,
 } from "@material-ui/icons";
 import { TabContext, TabPanel } from "@material-ui/lab";
-import geolocationService from "../../common/services/geolocation.service";
 import nwsService from "../../nws/services/nws.service";
 import localStorageService from "../../common/services/local-storage.service";
 import useNetworkStatus from "../../common/hooks/use-network-status";
@@ -47,7 +37,7 @@ import { TemperatureUnit } from "../../nws/enums/temperature-unit";
 import { Speed } from "../../nws/types/speed";
 import { Temperature } from "../../nws/types/temperature";
 import { Forecast } from "../../nws/interfaces/forecast";
-import Search from "../../arcgis-geocoding/components/search";
+import AppBar from "../components/app-bar";
 
 function initializeForecastState(): ForecastState {
   return (
@@ -207,78 +197,22 @@ export default function DashboardPage() {
     });
   };
 
-  const getCurrentLocation = () => {
-    geolocationService.getCurrentPosition().then(({ coords }) => {
-      updateLocation(coords.latitude, coords.longitude);
-    });
-  };
-
   const [menuAnchor, setMenuAnchor] = useState<null | HTMLElement>(null);
 
   const [activeTab, setActiveTab] = useState("hourly");
 
-  const [showSearch, setShowSearch] = useState(false);
   return (
     <div className={classes.root}>
       <TabContext value={activeTab}>
-        <AppBar position="sticky">
-          <Toolbar>
-            {!showSearch ? (
-              <>
-                <Typography variant="h6">
-                  {city || state
-                    ? `${city ?? "Unknown"}, ${state ?? "Unknown"}`
-                    : "Unknown"}
-                </Typography>
-                <IconButton color="inherit" onClick={() => setShowSearch(true)}>
-                  <SearchIcon />
-                </IconButton>
-                <Box className={classes.spacer} />
-                <IconButton
-                  color="inherit"
-                  edge="end"
-                  onClick={(e) => setMenuAnchor(e.currentTarget)}
-                >
-                  <MoreVertIcon />
-                </IconButton>
-              </>
-            ) : (
-              <div className={classes.searchOrLocateContainer}>
-                <div className={classes.searchContainer}>
-                  <Search
-                    fullWidth
-                    startAdornment={
-                      <IconButton
-                        className={classes.searchExitButton}
-                        onClick={() => setShowSearch(false)}
-                      >
-                        <ArrowBackIcon />
-                      </IconButton>
-                    }
-                    suggestParams={{
-                      category: ["Postal", "Populated Place"],
-                      countryCode: "USA",
-                    }}
-                    onSelectionChange={({ location: { x, y } }) => {
-                      setShowSearch(false);
-                      updateLocation(y, x);
-                    }}
-                  />
-                </div>
-                <IconButton
-                  color="inherit"
-                  className={classes.searchExitButton}
-                  onClick={() => {
-                    setShowSearch(false);
-                    getCurrentLocation();
-                  }}
-                >
-                  <MyLocationIcon />
-                </IconButton>
-              </div>
-            )}
-          </Toolbar>
-        </AppBar>
+        <AppBar
+          location={
+            city || state
+              ? `${city ?? "Unknown"}, ${state ?? "Unknown"}`
+              : undefined
+          }
+          onShowMenu={(e) => setMenuAnchor(e.currentTarget)}
+          onLocationChange={updateLocation}
+        />
         <Menu
           anchorEl={menuAnchor}
           open={Boolean(menuAnchor)}
