@@ -17,9 +17,11 @@ import {
   Typography,
 } from "@material-ui/core";
 import {
+  ArrowBack as ArrowBackIcon,
   MoreVert as MoreVertIcon,
   MyLocation as MyLocationIcon,
   Schedule as ScheduleIcon,
+  Search as SearchIcon,
   CalendarToday as CalendarTodayIcon,
 } from "@material-ui/icons";
 import { TabContext, TabPanel } from "@material-ui/lab";
@@ -45,6 +47,7 @@ import { TemperatureUnit } from "../../nws/enums/temperature-unit";
 import { Speed } from "../../nws/types/speed";
 import { Temperature } from "../../nws/types/temperature";
 import { Forecast } from "../../nws/interfaces/forecast";
+import Search from "../../arcgis-geocoding/components/search";
 
 function initializeForecastState(): ForecastState {
   return (
@@ -195,14 +198,18 @@ export default function DashboardPage() {
       ...rest,
     }));
 
-  const updateLocation = () => {
+  const updateLocation = (latitude: number, longitude: number) => {
+    forecastStateDispatch({
+      type: "updateForecast",
+      payload: {
+        location: { latitude, longitude },
+      },
+    });
+  };
+
+  const getCurrentLocation = () => {
     geolocationService.getCurrentPosition().then(({ coords }) => {
-      forecastStateDispatch({
-        type: "updateForecast",
-        payload: {
-          location: { latitude: coords.latitude, longitude: coords.longitude },
-        },
-      });
+      updateLocation(coords.latitude, coords.longitude);
     });
   };
 
@@ -210,27 +217,61 @@ export default function DashboardPage() {
 
   const [activeTab, setActiveTab] = useState("hourly");
 
+  const [showSearch, setShowSearch] = useState(false);
   return (
     <div className={classes.root}>
       <TabContext value={activeTab}>
         <AppBar position="sticky">
           <Toolbar>
-            <Typography variant="h6">
-              {city || state
-                ? `${city ?? "Unknown"}, ${state ?? "Unknown"}`
-                : "Unknown"}
-            </Typography>
-            <IconButton color="inherit" onClick={updateLocation}>
-              <MyLocationIcon />
-            </IconButton>
-            <Box className={classes.spacer} />
-            <IconButton
-              color="inherit"
-              edge="end"
-              onClick={(e) => setMenuAnchor(e.currentTarget)}
-            >
-              <MoreVertIcon />
-            </IconButton>
+            {!showSearch ? (
+              <>
+                <Typography variant="h6">
+                  {city || state
+                    ? `${city ?? "Unknown"}, ${state ?? "Unknown"}`
+                    : "Unknown"}
+                </Typography>
+                <IconButton color="inherit" onClick={() => setShowSearch(true)}>
+                  <SearchIcon />
+                </IconButton>
+                <Box className={classes.spacer} />
+                <IconButton
+                  color="inherit"
+                  edge="end"
+                  onClick={(e) => setMenuAnchor(e.currentTarget)}
+                >
+                  <MoreVertIcon />
+                </IconButton>
+              </>
+            ) : (
+              <div className={classes.searchContainer}>
+                <IconButton
+                  className={classes.searchExitButton}
+                  onClick={() => setShowSearch(false)}
+                >
+                  <ArrowBackIcon />
+                </IconButton>
+                <Search
+                  fullWidth
+                  suggestParams={{
+                    category: ["Postal", "Populated Place"],
+                    countryCode: "USA",
+                  }}
+                  onSelectionChange={({ location: { x, y } }) => {
+                    setShowSearch(false);
+                    updateLocation(y, x);
+                  }}
+                />
+                <IconButton
+                  className={classes.searchExitButton}
+                  onClick={() => {
+                    setShowSearch(false);
+                    getCurrentLocation();
+                  }}
+                >
+                  <MyLocationIcon />
+                </IconButton>
+              </div>
+            )}
           </Toolbar>
         </AppBar>
         <Menu

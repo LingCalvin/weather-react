@@ -1,4 +1,5 @@
 import { ResponseFormat } from "../types/response-format";
+import Extent from "./extent";
 
 export default interface SuggestParams {
   text: string;
@@ -9,33 +10,31 @@ export default interface SuggestParams {
   category?: string | string[];
   searchExtend?:
     | [number, number, number, number]
-    | {
-        xmin: number;
-        ymin: number;
-        xmax: number;
-        ymax: number;
+    | (Extent & {
         spatialReference: SpatialReference;
-      };
-  maxSuggestions?:
-    | 1
-    | 2
-    | 3
-    | 4
-    | 5
-    | 6
-    | 7
-    | 8
-    | 9
-    | 9
-    | 10
-    | 11
-    | 12
-    | 13
-    | 14
-    | 15;
+      });
+  maxSuggestions?: OneToFifteen;
+
   countryCode?: string;
 }
 
 interface SpatialReference {
   wkid: number;
 }
+
+type OneToFifteen =
+  | 1
+  | 2
+  | 3
+  | 4
+  | 5
+  | 6
+  | 7
+  | 8
+  | 9
+  | 10
+  | 11
+  | 12
+  | 13
+  | 14
+  | 15;

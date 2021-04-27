@@ -30,7 +30,7 @@ export default interface FindAddressCandidatesParams {
   locationType?: string;
   langCode?: string;
   sourceCountry?: string | string[];
-  preferredLabelValues: PreferredLabelValue | PreferredLabelValue[];
+  preferredLabelValues?: PreferredLabelValue | PreferredLabelValue[];
 }
 
 interface SpatialReference {

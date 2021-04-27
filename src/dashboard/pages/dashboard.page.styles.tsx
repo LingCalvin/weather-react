@@ -24,6 +24,18 @@ const useStyles = makeStyles((theme) => ({
     // Prevent the navigation bar from changing height when changing tabs
     minHeight: "56px",
   },
+  searchContainer: {
+    backgroundColor: theme.palette.background.paper,
+    width: "100%",
+    padding: `${theme.spacing(0.5)}px ${theme.spacing(1)}px`,
+    display: "flex",
+    alignItems: "center",
+    gap: theme.spacing(1),
+    borderRadius: theme.shape.borderRadius,
+  },
+  searchExitButton: {
+    padding: 0,
+  },
 }));
 
 export default useStyles;
