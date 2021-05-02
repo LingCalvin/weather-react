@@ -20,7 +20,7 @@ export default interface Alert {
   event: string;
   sender: string;
   senderName: string;
-  headline: string;
+  headline: string | null;
   description: string;
   instruction: string;
   response: string;

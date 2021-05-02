@@ -7,6 +7,8 @@ import { Urgency } from "../types/urgency";
 
 export default interface AlertsResponse extends FeatureCollection {
   features: AlertFeature[];
+  title: string;
+  updated: string;
 }
 
 interface AlertFeature extends Feature {
@@ -27,7 +29,7 @@ interface AlertFeature extends Feature {
     event: string;
     sender: string;
     senderName: string;
-    headline: string;
+    headline: string | null;
     description: string;
     instruction: string;
     response: string;
