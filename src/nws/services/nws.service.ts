@@ -17,11 +17,16 @@ import PointInfoResponse from "../interfaces/point-info-response";
 import { Station } from "../interfaces/station";
 import StationObservationsResponse from "../interfaces/station-observations-response";
 import StationsResponse from "../interfaces/stations-response";
+import { Certainty } from "../types/certainty";
 import { Distance } from "../types/distance";
 import { GetActiveAlertsParams } from "../types/get-active-alerts-params";
+import { MessageType } from "../types/message-type";
 import { Pressure } from "../types/pressure";
+import { Severity } from "../types/severity";
 import { Speed } from "../types/speed";
+import { Status } from "../types/status";
 import { Temperature } from "../types/temperature";
+import { Urgency } from "../types/urgency";
 
 class NWSService {
   constructor(private apiClient: AxiosInstance) {}
@@ -35,7 +40,20 @@ class NWSService {
   async getActiveAlerts(params: GetActiveAlertsParams): Promise<Alert[]> {
     return (await this.getActiveAlertsRaw(params)).features.map(
       ({
-        properties: { id, sent, effective, onset, expires, ends, ...rest },
+        properties: {
+          id,
+          sent,
+          effective,
+          onset,
+          expires,
+          ends,
+          status,
+          messageType,
+          severity,
+          certainty,
+          urgency,
+          ...rest
+        },
       }) => ({
         id,
         sent: convertToDateIfNotNull(sent),
@@ -43,6 +61,11 @@ class NWSService {
         onset: convertToDateIfNotNull(onset),
         expires: convertToDateIfNotNull(expires),
         ends: convertToDateIfNotNull(ends),
+        status: status.toLowerCase() as Status,
+        messageType: messageType.toLowerCase() as MessageType,
+        severity: severity.toLowerCase() as Severity,
+        certainty: certainty.toLowerCase() as Certainty,
+        urgency: urgency.toLowerCase() as Urgency,
         ...rest,
       })
     );

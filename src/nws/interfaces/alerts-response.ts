@@ -1,10 +1,4 @@
 import { Feature, FeatureCollection } from "geojson";
-import { Certainty } from "../types/certainty";
-import { MessageType } from "../types/message-type";
-import { Severity } from "../types/severity";
-import { Status } from "../types/status";
-import { Urgency } from "../types/urgency";
-
 export default interface AlertsResponse extends FeatureCollection {
   features: AlertFeature[];
   title: string;
@@ -20,12 +14,12 @@ interface AlertFeature extends Feature {
     onset: string | null;
     expires: string;
     ends: string | null;
-    status: Status;
-    messageType: MessageType;
+    status: string;
+    messageType: string;
     category: string;
-    severity: Severity;
-    certainty: Certainty;
-    urgency: Urgency;
+    severity: string;
+    certainty: string;
+    urgency: string;
     event: string;
     sender: string;
     senderName: string;
