@@ -12,6 +12,8 @@ TypeScript. Data is retrieved from the
 
 - Daily forecast
 
+- Active alerts
+
 - Configurable units
 
 ## Known Issues
