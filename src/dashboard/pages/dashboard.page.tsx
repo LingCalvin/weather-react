@@ -10,12 +10,14 @@ import {
   BottomNavigation,
   BottomNavigationAction,
   LinearProgress,
+  Link,
 } from "@material-ui/core";
 import {
-  Schedule as ScheduleIcon,
   CalendarToday as CalendarTodayIcon,
+  Schedule as ScheduleIcon,
+  Warning as WarningIcon,
 } from "@material-ui/icons";
-import { TabContext, TabPanel } from "@material-ui/lab";
+import { Alert, TabContext, TabPanel } from "@material-ui/lab";
 import nwsService from "../../nws/services/nws.service";
 import localStorageService from "../../common/services/local-storage.service";
 import useNetworkStatus from "../../common/hooks/use-network-status";
@@ -38,6 +40,7 @@ import { Speed } from "../../nws/types/speed";
 import { Temperature } from "../../nws/types/temperature";
 import { Forecast } from "../../nws/interfaces/forecast";
 import AppBar from "../components/app-bar";
+import AlertsPage from "./alerts.page";
 
 function initializeForecastState(): ForecastState {
   return (
@@ -66,33 +69,41 @@ function initializeForecastState(): ForecastState {
  * @returns A `Promise` for the new `ForecastState`
  */
 async function getForecast(location: Coordinates): Promise<ForecastState> {
-  const {
-    relativeLocation: { city, state },
-    gridId: wfo,
-    gridX: x,
-    gridY: y,
-  } = await nwsService.getPointInfo(location.latitude, location.longitude);
-  const forecast = await nwsService.getForecast({ wfo, x, y });
-  const hourlyForecast = await nwsService.getHourlyForecast({
-    wfo,
-    x,
-    y,
-  });
-  const stations = await nwsService.getStations({ wfo, x, y });
-  const { id: stationId } = stations[0];
-  const observations = await nwsService.getStationObservations({
-    stationId,
-    limit: 1, // Only get the most recent observation
-  });
-  return {
-    location,
-    city,
-    state,
-    forecast,
-    hourlyForecast,
-    stationId,
-    observations,
-  };
+  try {
+    const {
+      relativeLocation: { city, state },
+      gridId: wfo,
+      gridX: x,
+      gridY: y,
+    } = await nwsService.getPointInfo(location.latitude, location.longitude);
+    const forecast = await nwsService.getForecast({ wfo, x, y });
+    const hourlyForecast = await nwsService.getHourlyForecast({
+      wfo,
+      x,
+      y,
+    });
+    const stations = await nwsService.getStations({ wfo, x, y });
+    const { id: stationId } = stations[0];
+    const observations = await nwsService.getStationObservations({
+      stationId,
+      limit: 1, // Only get the most recent observation
+    });
+    const alerts = await nwsService.getActiveAlerts({
+      point: `${location.latitude},${location.longitude}`,
+    });
+    return {
+      location,
+      city,
+      state,
+      forecast,
+      hourlyForecast,
+      stationId,
+      observations,
+      alerts,
+    };
+  } catch (e) {
+    return Promise.reject(e);
+  }
 }
 
 export default function DashboardPage() {
@@ -115,6 +126,7 @@ export default function DashboardPage() {
     hourlyForecast,
     observations,
     stationId,
+    alerts,
   } = forecastState;
 
   const currentWeather = observations?.[0] ?? null;
@@ -201,6 +213,10 @@ export default function DashboardPage() {
 
   const [activeTab, setActiveTab] = useState("hourly");
 
+  const activeAlerts = (alerts ?? []).filter(
+    ({ expires }) => expires > currentDate
+  );
+
   return (
     <div className={classes.root}>
       <TabContext value={activeTab}>
@@ -230,37 +246,55 @@ export default function DashboardPage() {
           }}
         />
         {loading && <LinearProgress color="secondary" />}
-        <main className={classes.main}>
-          <TabPanel value="hourly">
-            {currentWeather && currentHourlyPeriods?.length && (
-              <HourlyForecastPage
-                className={classes.hourlyForecastPage}
-                updateTime={new Date(currentWeather.timestamp)}
-                station={stationId ?? ""}
-                currentWeather={{
-                  icon: currentWeather.icon,
-                  shortForecast: currentWeather.description,
-                  temperature: transformTemperature({
-                    value: currentWeather.temperature?.value ?? 0,
-                    unit: TemperatureUnit.Celsius,
-                  }),
-                  windSpeed:
-                    currentWeather?.windSpeed !== undefined
-                      ? transformSpeed({
-                          value: currentWeather.windSpeed.value,
-                          unit: SpeedUnit.KilometersPerHour,
-                        })
-                      : undefined,
-                  relativeHumidity: currentWeather.relativeHumidity,
-                }}
-                hourlyForecast={currentHourlyPeriods}
+        <div className={classes.body}>
+          {activeTab !== "alerts" && activeAlerts.length > 0 && (
+            <Alert severity="error">
+              <Link
+                href="#"
+                color="inherit"
+                onClick={() => setActiveTab("alerts")}
+              >
+                Active alerts
+              </Link>
+            </Alert>
+          )}
+          <main className={classes.main}>
+            <TabPanel value="hourly">
+              {currentWeather && currentHourlyPeriods?.length && (
+                <HourlyForecastPage
+                  className={classes.hourlyForecastPage}
+                  updateTime={new Date(currentWeather.timestamp)}
+                  station={stationId ?? ""}
+                  currentWeather={{
+                    icon: currentWeather.icon,
+                    shortForecast: currentWeather.description,
+                    temperature: transformTemperature({
+                      value: currentWeather.temperature?.value ?? 0,
+                      unit: TemperatureUnit.Celsius,
+                    }),
+                    windSpeed:
+                      currentWeather?.windSpeed !== undefined
+                        ? transformSpeed({
+                            value: currentWeather.windSpeed.value,
+                            unit: SpeedUnit.KilometersPerHour,
+                          })
+                        : undefined,
+                    relativeHumidity: currentWeather.relativeHumidity,
+                  }}
+                  hourlyForecast={currentHourlyPeriods}
+                />
+              )}
+            </TabPanel>
+            <TabPanel value="daily">
+              <DailyForecastPage
+                forecast={transformedForecast?.periods ?? []}
               />
-            )}
-          </TabPanel>
-          <TabPanel value="daily">
-            <DailyForecastPage forecast={transformedForecast?.periods ?? []} />
-          </TabPanel>
-        </main>
+            </TabPanel>
+            <TabPanel value="alerts">
+              <AlertsPage alerts={activeAlerts} />
+            </TabPanel>
+          </main>
+        </div>
         <BottomNavigation
           value={activeTab}
           onChange={(e, value) => setActiveTab(value)}
@@ -276,6 +310,11 @@ export default function DashboardPage() {
             icon={<CalendarTodayIcon />}
             label="Daily"
             value="daily"
+          />
+          <BottomNavigationAction
+            icon={<WarningIcon />}
+            label="Alerts"
+            value="alerts"
           />
         </BottomNavigation>
       </TabContext>

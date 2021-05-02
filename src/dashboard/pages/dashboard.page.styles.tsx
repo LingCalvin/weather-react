@@ -6,8 +6,13 @@ const useStyles = makeStyles((theme) => ({
     display: "flex",
     flexDirection: "column",
   },
-  main: {
+  body: {
+    display: "flex",
+    flexDirection: "column",
     overflowY: "auto",
+    flexGrow: 1,
+  },
+  main: {
     flexGrow: 1,
   },
   hourlyForecastPage: {
