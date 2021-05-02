@@ -5,6 +5,8 @@ import { PressureUnit } from "../enums/pressure-unit";
 import { SpeedUnit } from "../enums/speed-unit";
 import { TemperatureUnit } from "../enums/temperature-unit";
 import UnexpectedUnitCodeException from "../exceptions/unexpected-unit-code.exceptions";
+import Alert from "../interfaces/alert";
+import AlertsResponse from "../interfaces/alerts-response";
 import { Forecast, Period } from "../interfaces/forecast";
 import ForecastResponse, {
   Period as RawPeriod,
@@ -16,12 +18,35 @@ import { Station } from "../interfaces/station";
 import StationObservationsResponse from "../interfaces/station-observations-response";
 import StationsResponse from "../interfaces/stations-response";
 import { Distance } from "../types/distance";
+import { GetActiveAlertsParams } from "../types/get-active-alerts-params";
 import { Pressure } from "../types/pressure";
 import { Speed } from "../types/speed";
 import { Temperature } from "../types/temperature";
 
 class NWSService {
   constructor(private apiClient: AxiosInstance) {}
+
+  async getActiveAlertsRaw(
+    params: GetActiveAlertsParams
+  ): Promise<AlertsResponse> {
+    return (await this.apiClient.get("/alerts/active", { params })).data;
+  }
+
+  async getActiveAlerts(params: GetActiveAlertsParams): Promise<Alert[]> {
+    return (await this.getActiveAlertsRaw(params)).features.map(
+      ({
+        properties: { id, sent, effective, onset, expires, ends, ...rest },
+      }) => ({
+        id,
+        sent: convertToDateIfNotNull(sent),
+        effective: convertToDateIfNotNull(effective),
+        onset: convertToDateIfNotNull(onset),
+        expires: convertToDateIfNotNull(expires),
+        ends: convertToDateIfNotNull(ends),
+        ...rest,
+      })
+    );
+  }
 
   async getPointInfoRaw(
     latitude: number,
@@ -167,6 +192,16 @@ const nwsService = new NWSService(
 export default nwsService;
 
 // Internal conversion functions
+
+function convertToDateIfNotNull(date: string): Date;
+function convertToDateIfNotNull(date: null): null;
+function convertToDateIfNotNull(date: string | null): Date | null;
+function convertToDateIfNotNull(date: string | null) {
+  if (date === null) {
+    return null;
+  }
+  return new Date(date);
+}
 
 function convertRawPeriodToPeriod(rawPeriod: RawPeriod): Period {
   return {
